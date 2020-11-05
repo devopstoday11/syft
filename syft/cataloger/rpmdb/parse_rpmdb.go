@@ -48,6 +48,16 @@ func parseRpmDB(_ string, reader io.Reader) ([]pkg.Package, error) {
 	allPkgs := make([]pkg.Package, 0)
 
 	for _, entry := range pkgList {
+		var records = make([]pkg.RpmdbFileRecord, len(entry.Files))
+
+		for i, record := range entry.Files {
+			records[i] = pkg.RpmdbFileRecord{
+				Path:   record.Path,
+				Mode:   pkg.RpmdbFileMode(record.Mode),
+				SHA256: record.SHA256,
+			}
+		}
+
 		p := pkg.Package{
 			Name:    entry.Name,
 			Version: fmt.Sprintf("%s-%s", entry.Version, entry.Release), // this is what engine does
@@ -64,6 +74,7 @@ func parseRpmDB(_ string, reader io.Reader) ([]pkg.Package, error) {
 				Vendor:    entry.Vendor,
 				License:   entry.License,
 				Size:      entry.Size,
+				Files:     records,
 			},
 		}
 
